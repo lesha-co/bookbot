@@ -57,7 +57,7 @@ class InpxToSqliteConverter {
             // 0: AUTHOR
             assert(fields[0]);
             // 1: GENRE
-            assert(fields[1]);
+            // assert(fields[1]);
             // 2: TITLE
             assert(fields[2]);
             // 5: FILEname
@@ -71,12 +71,12 @@ class InpxToSqliteConverter {
             // 12: ZIP-file
             assert(fields[12]);
             // 13: Language
-            assert(fields[13]);
+            // assert(fields[13]);
             return {
                 book_author: fields[0],
-                book_genre: fields[1],
+                book_genre: fields[1] ?? null,
                 book_title: fields[2],
-                book_language: fields[13],
+                book_language: fields[13] ?? null,
                 lib_id: parseInt(fields[7]),
                 file_location: fields[12],
                 file_name: fields[5] + "." + fields[9],
@@ -263,9 +263,15 @@ class InpxToSqliteConverter {
 async function main(inpxPath: string) {
     assert(process.env.DBNAME);
     assert(process.env.ROOT);
-    const tmpDBPath = path.join(process.cwd(), process.env.DBNAME);
-    fs.unlinkSync(tmpDBPath);
+    const tmpDBPath = path.join(process.env.ROOT, process.env.DBNAME + ".new");
+    if (fs.existsSync(tmpDBPath)) {
+        fs.unlinkSync(tmpDBPath);
+    }
     const productionDBPath = path.join(process.env.ROOT, process.env.DBNAME);
+    const productionDBBackupPath = path.join(
+        process.env.ROOT,
+        process.env.DBNAME + ".backup",
+    );
 
     if (!fs.existsSync(inpxPath)) {
         console.error(`INPX file not found: ${inpxPath}`);
@@ -280,6 +286,21 @@ async function main(inpxPath: string) {
         await converter.convertInpx(inpxPath);
         console.log("\nConversion completed successfully!");
         console.log(`\nDatabase saved to: ${tmpDBPath}`);
+
+        // Backup existing production database if it exists
+        if (fs.existsSync(productionDBPath)) {
+            fs.renameSync(productionDBPath, productionDBBackupPath);
+            console.log(
+                `\nBacked up existing database to: ${productionDBBackupPath}`,
+            );
+        }
+
+        // Move temporary database to production location
+        fs.copyFileSync(tmpDBPath, productionDBPath);
+        fs.unlinkSync(tmpDBPath);
+        console.log(
+            `\nMoved database to production location: ${productionDBPath}`,
+        );
     } catch (error) {
         console.error("Conversion failed:", error);
         process.exit(1);

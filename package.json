@@ -4,7 +4,8 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "start": "node --env-file=.env src/index.ts"
+        "start": "node --env-file=.env src/index.ts",
+        "db": "node --env-file=.env src/seed-database.ts"
     },
     "keywords": [],
     "author": "",
