@@ -4,15 +4,29 @@ import {
     classifier,
     getConsumer,
 } from "telegram-bot-framework-state-machine";
-import type { Meta } from "telegram-bot-framework-state-machine";
+import type { Meta, StateMachine } from "telegram-bot-framework-state-machine";
 import pipe from "callback-to-async-generator";
 import { getContext } from "./getContext.ts";
-import { stateMachine } from "../stateMachine.ts";
+import { handler } from "../handler.ts";
+import type { TelegramDialogContext } from "./types.ts";
 
 export async function start() {
     const bot = getBot();
     const p = pipe<TelegramBot.Message>();
     bot.on("message", p.send);
+
+    const stateMachine: StateMachine<
+        { id: "root"; transitions: "root" },
+        TelegramDialogContext
+    > = {
+        states: {
+            async root(ctx) {
+                await handler(ctx);
+                return { id: "root" };
+            },
+        },
+        rootState: { id: "root" },
+    };
 
     await classifier<TelegramBot.Message, Meta>(
         p.generator,

@@ -2,6 +2,7 @@ import { BookSchema } from "./schema.ts";
 import sqlite from "node:sqlite";
 import path from "node:path";
 import yauzl from "yauzl";
+import { sanitize } from "./sanitize.ts";
 export class API {
     private db: sqlite.DatabaseSync;
     private query: sqlite.StatementSync;
@@ -12,18 +13,9 @@ export class API {
         this.query = this.db.prepare("SELECT * FROM books WHERE lib_id = ?");
         this.root = root;
     }
-    public sanitize(term: string) {
-        const words = term
-            .toLowerCase()
-            .replace(/[^\sa-z0-9а-я]/g, "")
-            .split(" ")
-            .filter((x) => x.length);
-
-        return words;
-    }
 
     public query_text(q: string) {
-        const words = this.sanitize(q);
+        const words = sanitize(q);
         const statements = words
             .map((word) => `LOWER(key) LIKE '%${word}%'`)
             .join(" AND ");

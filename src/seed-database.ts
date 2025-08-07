@@ -5,6 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import makePipe from "callback-to-async-generator";
 import assert from "node:assert";
 import type { BookSchema } from "./schema.ts";
+import { sanitize } from "./sanitize.ts";
 
 class InpxToSqliteConverter {
     private db: DatabaseSync;
@@ -54,22 +55,22 @@ class InpxToSqliteConverter {
 
         try {
             // 0: AUTHOR
-            // 1: GENRE
-            // 2: TITLE
-            // 5: FILEname
-            // 6: SIZE
-            // 7: LIBID
-            // 9: EXTension
-            // 12: ZIP-file
-            // 13: Language
             assert(fields[0]);
+            // 1: GENRE
             assert(fields[1]);
+            // 2: TITLE
             assert(fields[2]);
+            // 5: FILEname
             assert(fields[5]);
+            // 6: SIZE
             assert(fields[6]);
+            // 7: LIBID
             assert(fields[7]);
+            // 9: EXTension
             assert(fields[9]);
+            // 12: ZIP-file
             assert(fields[12]);
+            // 13: Language
             assert(fields[13]);
             return {
                 book_author: fields[0],
@@ -225,12 +226,9 @@ class InpxToSqliteConverter {
             for (const record of batch) {
                 //(lib_id, book_title, book_author, book_genre, book_language, file_name, file_size,  file_location)
 
-                const key = (record.book_author + " " + record.book_title)
-                    .toLowerCase()
-                    .replace(/[^\sa-z0-9а-я]/g, " ")
-                    .split(" ")
-                    .filter((x) => x.length)
-                    .join(" ");
+                const key = sanitize(
+                    record.book_author + " " + record.book_title,
+                ).join(" ");
                 try {
                     this.insertStmt.run(
                         record.lib_id,
@@ -259,50 +257,29 @@ class InpxToSqliteConverter {
     public close(): void {
         this.db.close();
     }
-
-    public getStats(): {
-        totalBooks: number;
-        uniqueAuthors: number;
-    } {
-        const totalBooks = this.db
-            .prepare("SELECT COUNT(*) as count FROM books")
-            .get() as { count: number };
-        const uniqueAuthors = this.db
-            .prepare("SELECT COUNT(DISTINCT book_author) as count FROM books")
-            .get() as { count: number };
-
-        return {
-            totalBooks: totalBooks.count,
-            uniqueAuthors: uniqueAuthors.count,
-        };
-    }
 }
 
 // Main execution
 async function main(inpxPath: string) {
-    const dbPath = path.join(process.cwd(), `flibusta.sqlite`);
+    assert(process.env.DBNAME);
+    assert(process.env.ROOT);
+    const tmpDBPath = path.join(process.cwd(), process.env.DBNAME);
+    fs.unlinkSync(tmpDBPath);
+    const productionDBPath = path.join(process.env.ROOT, process.env.DBNAME);
 
     if (!fs.existsSync(inpxPath)) {
         console.error(`INPX file not found: ${inpxPath}`);
         process.exit(1);
     }
 
-    console.log(`Converting ${inpxPath} to SQLite database: ${dbPath}`);
+    console.log(`Converting ${inpxPath} to SQLite database: ${tmpDBPath}`);
 
-    const converter = new InpxToSqliteConverter(dbPath);
+    const converter = new InpxToSqliteConverter(tmpDBPath);
 
     try {
         await converter.convertInpx(inpxPath);
-
-        const stats = converter.getStats();
         console.log("\nConversion completed successfully!");
-        console.log(`Database stats:`);
-        console.log(`  Total books: ${stats.totalBooks.toLocaleString()}`);
-        console.log(
-            `  Unique authors: ${stats.uniqueAuthors.toLocaleString()}`,
-        );
-
-        console.log(`\nDatabase saved to: ${dbPath}`);
+        console.log(`\nDatabase saved to: ${tmpDBPath}`);
     } catch (error) {
         console.error("Conversion failed:", error);
         process.exit(1);
