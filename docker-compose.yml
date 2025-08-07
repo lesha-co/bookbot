@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+    inpx-reader:
+        build: .
+        volumes:
+            - ${ROOT}:${ROOT}:ro
+        env_file:
+            - .env
+        restart: unless-stopped
