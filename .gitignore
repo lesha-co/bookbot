@@ -1,3 +1,4 @@
 @eaDir/
 node_modules/
 .env
+.env.local

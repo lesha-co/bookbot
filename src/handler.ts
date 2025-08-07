@@ -17,7 +17,6 @@ export async function handler(ctx: TelegramDialogContext) {
         createMessage(
             `Напиши запрос буквами и цифрами через пробелы без спецсимволов`,
             {
-                md: true,
                 removeKeyboard: true,
             },
         ),
@@ -38,7 +37,6 @@ export async function handler(ctx: TelegramDialogContext) {
         createMessage(
             `Выбрана книга ${book.book_title}\nавтор ${book.book_author}`,
             {
-                md: true,
                 removeKeyboard: true,
             },
         ),
