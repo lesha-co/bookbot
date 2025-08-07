@@ -60,7 +60,6 @@ export const stateMachine: StateMachine<
                 for (let i = 0; i < 5; i++) {
                     const nxt = iterator.next();
                     if (nxt.done) break;
-                    console.log(nxt.value);
                     const book = BookSchema.parse(nxt.value);
                     books.push(book);
                 }
