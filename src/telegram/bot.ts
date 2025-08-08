@@ -1,10 +1,6 @@
 import TelegramBot from "node-telegram-bot-api";
-import {
-    getBot,
-    classifier,
-    getConsumer,
-} from "telegram-bot-framework-state-machine";
-import type { Meta } from "telegram-bot-framework-state-machine";
+import { getBot, classifier } from "telegram-bot-framework-state-machine";
+import type { Meta } from "./types.ts";
 import pipe from "callback-to-async-generator";
 import { getContext } from "./getContext.ts";
 import { handler } from "../handler.ts";

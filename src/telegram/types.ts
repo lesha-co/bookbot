@@ -27,3 +27,8 @@ export type TelegramDialogContext = {
         T["options"]["reply_markup"]["keyboard"][number][number]["text"]
     >;
 };
+
+export type Meta = {
+    chat: TelegramBot.Chat;
+    user: TelegramBot.User | undefined;
+};

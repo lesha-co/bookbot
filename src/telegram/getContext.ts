@@ -1,6 +1,6 @@
 import TelegramBot from "node-telegram-bot-api";
-import type { TelegramDialogContext } from "./types.ts";
-import type { Meta } from "telegram-bot-framework-state-machine";
+import type { Meta, TelegramDialogContext } from "./types.ts";
+
 import { logMessage } from "./logMessage.ts";
 
 export function getContext(
