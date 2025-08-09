@@ -1,4 +1,4 @@
-import { createMessage } from "telegram-bot-framework-state-machine";
+import { createMessage } from "@leshenka/telegram-bot-framework";
 import type { TelegramDialogContext } from "./telegram/types.ts";
 import assert from "node:assert";
 import path from "node:path";

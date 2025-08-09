@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import yauzl from "yauzl";
 import { DatabaseSync } from "node:sqlite";
-import makePipe from "callback-to-async-generator";
+import makePipe from "@leshenka/callback-to-async-generator";
 import assert from "node:assert";
 import type { BookSchema } from "./schema.ts";
 import { sanitize } from "./sanitize.ts";
